@@ -2,7 +2,7 @@ Aruba - https://en.wikipedia.org/wiki/Aruba
 Afghanistan - https://en.wikipedia.org/wiki/Afghanistan
 Angola - https://en.wikipedia.org/wiki/Angola
 Anguilla - https://en.wikipedia.org/wiki/Anguilla
-Åland Islands - https://en.wikipedia.org/wiki/Åland_Islands
+Åland Islands - https://en.wikipedia.org/wiki/%C3%85land_Islands
 Albania - https://en.wikipedia.org/wiki/Albania
 Andorra - https://en.wikipedia.org/wiki/Andorra
 United Arab Emirates - https://en.wikipedia.org/wiki/United_Arab_Emirates
@@ -24,7 +24,7 @@ Bulgaria - https://en.wikipedia.org/wiki/Bulgaria
 Bahrain - https://en.wikipedia.org/wiki/Bahrain
 Bahamas - https://en.wikipedia.org/wiki/Bahamas
 Bosnia and Herzegovina - https://en.wikipedia.org/wiki/Bosnia_and_Herzegovina
-Saint Barthélemy - https://en.wikipedia.org/wiki/Saint_Barthélemy
+Saint Barthélemy - https://en.wikipedia.org/wiki/Saint_Barth%C3%A9lemy
 Saint Helena, Ascension and Tristan da Cunha - https://en.wikipedia.org/wiki/Saint_Helena,_Ascension_and_Tristan_da_Cunha
 Belarus - https://en.wikipedia.org/wiki/Belarus
 Belize - https://en.wikipedia.org/wiki/Belize
@@ -53,7 +53,7 @@ Comoros - https://en.wikipedia.org/wiki/Comoros
 Cape Verde - https://en.wikipedia.org/wiki/Cape_Verde
 Costa Rica - https://en.wikipedia.org/wiki/Costa_Rica
 Cuba - https://en.wikipedia.org/wiki/Cuba
-Curaçao - https://en.wikipedia.org/wiki/Curaçao
+Curaçao - https://en.wikipedia.org/wiki/Cura%C3%A7ao
 Christmas Island - https://en.wikipedia.org/wiki/Christmas_Island
 Cayman Islands - https://en.wikipedia.org/wiki/Cayman_Islands
 Cyprus - https://en.wikipedia.org/wiki/Cyprus
@@ -187,7 +187,7 @@ Paraguay - https://en.wikipedia.org/wiki/Paraguay
 Palestine - https://en.wikipedia.org/wiki/Palestine
 French Polynesia - https://en.wikipedia.org/wiki/French_Polynesia
 Qatar - https://en.wikipedia.org/wiki/Qatar
-Réunion - https://en.wikipedia.org/wiki/Réunion
+Réunion - https://en.wikipedia.org/wiki/R%C3%A9union
 Romania - https://en.wikipedia.org/wiki/Romania
 Russia - https://en.wikipedia.org/wiki/Russia
 Rwanda - https://en.wikipedia.org/wiki/Rwanda
@@ -205,7 +205,7 @@ Somalia - https://en.wikipedia.org/wiki/Somalia
 Saint Pierre and Miquelon - https://en.wikipedia.org/wiki/Saint_Pierre_and_Miquelon
 Serbia - https://en.wikipedia.org/wiki/Serbia
 South Sudan - https://en.wikipedia.org/wiki/South_Sudan
-São Tomé and Príncipe - https://en.wikipedia.org/wiki/São_Tomé_and_Príncipe
+São Tomé and Príncipe - https://en.wikipedia.org/wiki/S%C3%A3o_Tom%C3%A9_and_Pr%C3%ADncipe
 Suriname - https://en.wikipedia.org/wiki/Suriname
 Slovakia - https://en.wikipedia.org/wiki/Slovakia
 Slovenia - https://en.wikipedia.org/wiki/Slovenia
@@ -221,7 +221,7 @@ Thailand - https://en.wikipedia.org/wiki/Thailand
 Tajikistan - https://en.wikipedia.org/wiki/Tajikistan
 Tokelau - https://en.wikipedia.org/wiki/Tokelau
 Turkmenistan - https://en.wikipedia.org/wiki/Turkmenistan
-Timor-Leste - https://en.wikipedia.org/wiki/Timor-Leste
+Timor-Leste - https://en.wikipedia.org/wiki/Timor_Leste
 Tonga - https://en.wikipedia.org/wiki/Tonga
 Trinidad and Tobago - https://en.wikipedia.org/wiki/Trinidad_and_Tobago
 Tunisia - https://en.wikipedia.org/wiki/Tunisia
