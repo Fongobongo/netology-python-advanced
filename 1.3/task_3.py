@@ -2,7 +2,7 @@ def adv_print(*args, **kwargs):
     if kwargs.get('sep') is None:
         kwargs['sep'] = ' '
     if kwargs.get('end') is None:
-        kwargs['end'] = '\n'
+        kwargs['end'] = ''
     output = kwargs.get('sep').join(args) + kwargs.get('end')
     kwargs.pop('end')
     if kwargs.get('start'):
@@ -10,13 +10,13 @@ def adv_print(*args, **kwargs):
         kwargs.pop('start')
     else:
         output = '\n' + output
-    if kwargs.get('max_line') is not None:
+    if kwargs.get('max_line'):
         limited_output = ''
         for i in range(0, len(output), kwargs.get('max_line')):
             limited_output += output[i:i+kwargs.get('max_line')] + '\n'
         output = limited_output.strip()
         kwargs.pop('max_line')
-    if kwargs.get('in_file') is not None:
+    if kwargs.get('in_file'):
         with open(kwargs.get('in_file'), 'a', encoding='utf-8') as f:
             f.write(output)
             f.write('\n')
@@ -24,6 +24,5 @@ def adv_print(*args, **kwargs):
     print(output, **kwargs)
 
 
-adv_print('AAAAAAAAAA', 'BBBBBBBBBB', 'CCCCCCCCCC', max_line=5, start='GOGOGO', in_file='somefile.txt', end='----->', sep='******')
-print()
-print('AAAAAAAAAA', 'BBBBBBBBBB', 'CCCCCCCCCC', end='----->', sep='******')
+if __name__ == '__main__':
+    adv_print('AAAAAAAAA', 'BBBBBBBBB', max_line=4, start='~~~', in_file='somefile.txt', end='------>', sep='******')
