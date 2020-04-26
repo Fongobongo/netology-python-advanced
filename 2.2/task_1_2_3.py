@@ -48,6 +48,7 @@ for row in contacts_list:
 			phone[3] = re.search(r'\d+', phone[3]).group()
 			phone[3] = ' доб.' + phone[3]
 		phone = ''.join(phone)
+		row[5] = phone
 
 	for row_number, new_row in enumerate(new_contacts_list.copy()):
 		no_dup_row = search_for_unique_person(row, new_row)
