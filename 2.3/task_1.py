@@ -75,14 +75,11 @@ def get_students(course_id):
 		with connection.cursor() as cursor:
 			cursor.execute("select name from course where id=(%s)", (course_id,))
 			course_name = cursor.fetchone()[0]
-			cursor.execute("select student_id from student_course where course_id=(%s)", (course_id, ))
-			response = cursor.fetchall()
-			students = []
-			for student in response:
-				student_id = student[0]
-				student_name = get_student(student_id)[1]
-				students.append([student_name, student_id])
-	print(f'Студенты [имя, id] на курсе {course_name} (id {course_id}): {students}.')
+			cursor.execute("""select student.id, student.name from student_course 
+			inner join student on student_course.student_id = student.id
+			where student_course.course_id=(%s)""", (course_id, ))
+			students = cursor.fetchall()
+	print(f'Студенты [(id, имя),] на курсе {course_name} (id {course_id}): {students}.')
 	return course_name, students
 
 
