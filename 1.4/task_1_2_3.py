@@ -36,7 +36,7 @@ def log_to_path(path):
     return log_decorator
 
 
-# Функция продвинутый print из задания № 3 к Лекции 1.3
+# Функция продвинутый print из задания № 3 к Лекции 1.3 (advanced python)
 @log_to_path('./log.txt')
 def adv_print(*args, **kwargs):
     if kwargs.get('sep') is None:
