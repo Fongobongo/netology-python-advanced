@@ -100,30 +100,13 @@ class User:
 
         self.vk_id = vk_id
         self.groups = self.common_groups = None
-        self.common_groups_count = self.rating = 0
+        self.common_groups_count = self.common_friends_count = self.rating = 0
         self.common_favorites = dict()
 
         if user_info:
             self.user_info = user_info
         else:
             self.user_info = self.get_user_info()
-
-        if self.user_info.get('common_count'):
-            self.common_friends_count = self.user_info.get('common_count')
-        else:
-            self.common_friends_count = 0
-
-        self.favorites = {
-            'movies': self.user_info.get('movies'),
-            'music': self.user_info.get('music'),
-            'games': self.user_info.get('games'),
-            'books': self.user_info.get('books'),
-            'interests': self.user_info.get('interests')
-        }
-
-        for key, value in self.favorites.copy().items():
-            if not value:
-                self.favorites.pop(key)
 
     def get_user_info(self):
 
@@ -435,48 +418,42 @@ def find_common_groups(user, users):
             current_user.common_groups_count = len(common_groups)
 
 
-def add_search_criteria(user):
+def count_rating(user, users):
 
     count = 0
 
     pattern = re.compile('[^\w\d\s.,]')
 
-    for criteria_key, criteria_value in my_favorites.items():
+    main_user_favorites = my_favorites
 
-        if not user.favorites.get(criteria_key) and my_favorites.get(criteria_key):
-            criteria_value = my_favorites.get(criteria_key)
-        elif user.favorites.get(criteria_key) and my_favorites.get(criteria_key):
-            criteria_value = user.favorites.get(criteria_key) + ", " + my_favorites.get(criteria_key)
-
-        if criteria_value:
+    for key, value in my_favorites.copy().items():
+        if user.user_info.get(key):
+            criteria_value = value + ", " + user.user_info.get(key)
+            main_user_favorites.update({key: criteria_value})
+        if main_user_favorites.get(key):
             count += 1
-            filtered_string = re.sub(pattern, '', criteria_value).replace(", ", ",")
+            filtered_string = re.sub(pattern, '', value).replace(", ", ",")
             criteria_value = set(x.lower().strip() for x in filtered_string.split(","))
-            user.favorites.update({criteria_key: criteria_value})
+            main_user_favorites.update({key: criteria_value})
+        else:
+            main_user_favorites.pop(key)
 
     if count < minimum_favorites:
         raise errors.NotEnoughFavorites(count)
 
-
-def count_rating(user, users):
-
-    main_user_favorites = user.favorites
-    print(main_user_favorites)
-
-    pattern = re.compile('[^\w\d\s.,]')
-
     for current_user in users.values():
-
-        current_user.rating += current_user.common_friends_count + current_user.common_groups_count
-
+        current_user_favorites = dict()
         for key in main_user_favorites.keys():
-            if current_user.favorites.get(key) and user.favorites.get(key):
-                filtered_string = re.sub(pattern, '', current_user.favorites.get(key)).replace(", ", ",")
-                current_user.favorites[key] = set(x.lower().strip() for x in filtered_string.split(","))
-                common_interest = user.favorites.get(key).intersection(current_user.favorites.get(key))
+            if current_user.user_info.get(key):
+                filtered_string = re.sub(pattern, '', current_user.user_info.get(key)).replace(", ", ",")
+                current_user_favorites[key] = set(x.lower().strip() for x in filtered_string.split(","))
+                common_interest = main_user_favorites.get(key).intersection(current_user_favorites.get(key))
                 if common_interest:
                     current_user.common_favorites.update({key: common_interest})
                     current_user.rating += len(common_interest)
+
+        current_user.rating += current_user.user_info.get('common_count', 0) + current_user.common_groups_count
+
         print(current_user.common_favorites, current_user.rating)
 
 
@@ -493,10 +470,11 @@ def get_top_users(users):
 
 
 def write_top_to_db(users):
-    for user in users.items():
+    # for user in users.items():
         # attr = vars(user)
-        print(vars(user[1]))
+        # print(vars(user[1]))
         # ', '.join("%s: %s" % item for item in attr.items())
+    pass
 
 
 if __name__ == '__main__':
@@ -504,8 +482,6 @@ if __name__ == '__main__':
 
         main_user_vk_id = get_main_user_vk_id()
         main_user = User(main_user_vk_id)
-
-        add_search_criteria(main_user)
 
         results = search_for_couple(main_user)
 
