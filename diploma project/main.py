@@ -99,14 +99,19 @@ class User:
     def __init__(self, vk_id, user_info=''):
 
         self.vk_id = vk_id
-        self.common_friends = self.groups = self.common_groups = None
-        self.common_friends_count = self.common_groups_count = self.rating = 0
+        self.groups = self.common_groups = None
+        self.common_groups_count = self.rating = 0
         self.common_favorites = dict()
 
         if user_info:
             self.user_info = user_info
         else:
             self.user_info = self.get_user_info()
+
+        if self.user_info.get('common_count'):
+            self.common_friends_count = self.user_info.get('common_count')
+        else:
+            self.common_friends_count = 0
 
         self.favorites = {
             'movies': self.user_info.get('movies'),
@@ -229,9 +234,11 @@ def search_for_couple(user):
     if options['city']:
         city_id = get_city_id(options['city'])
 
-    elif user_info.get('city'):
+    elif options['city'] is None and user_info.get('city'):
         city_id = user_info.get('city').get('id')
 
+    else:
+        city_id = 1
     url = f'https://api.vk.com/method/users.search?PARAMETERS'
 
     params = {
@@ -243,14 +250,13 @@ def search_for_couple(user):
         'age_from': age_from,
         'age_to': age_to,
         'city': city_id,
-        'fields': 'sex, bdate, city, movies, music, books, games, interests, last_seen, relation, about, status',
+        'fields': 'sex, bdate, city, movies, music, books, games, interests, last_seen, relation, common_count',
         'v': '5.110'
     }
 
     response = get_response_without_error(url, params)
     if response.get('response'):
         count = response.get('response').get('count')
-
         if count > 1000:
 
             ages_amount = age_delta + 1
@@ -378,52 +384,6 @@ def get_25_vk_ids_for_execute(users_dict):
     return vk_ids_for_execute
 
 
-def get_mutual_friends(user, execute_packs, users_dict):
-
-    id = user.vk_id
-
-    amount_of_executes = len(execute_packs) / 25
-
-    iteration = 0
-
-    result = None
-
-    while iteration < amount_of_executes:
-        start_index = 0
-        pack = execute_packs[start_index: start_index+25]
-        pack_length = len(pack)
-        # print("Новый заход")
-        execute_code = """var friends = [];
-                        var index = 0;
-                        var pack = %s;
-                        var end = %s;
-                        while (index < end) {
-                        var result = API.friends.getMutual({"source_uid":%s,"target_uids":pack[index]});
-                         friends = friends + [result];
-                        index = index + 1;
-                        };
-                        return friends;""" % (pack, pack_length, id)
-
-        response = get_response_without_error('https://api.vk.com/method/execute?PARAMETERS', dict(code=execute_code, v='5.110', access_token=constant['TOKEN']))
-
-        result = result + response.get('response') if result else response.get('response')
-
-        iteration += 1
-
-        if iteration % 3 == 0:
-            time.sleep(1)
-
-        start_index += 25
-
-    for pack in result:
-        for user in pack:
-            id = user.get('id')
-            users_dict.get(id).common_friends = user.get('common_friends')
-            users_dict.get(id).common_friends_count = user.get('common_count')
-
-    return result
-
-
 def get_groups(vk_ids_in_25_per_pack, users_dict):
     amount_of_executes = len(vk_ids_in_25_per_pack)
 
@@ -529,7 +489,6 @@ def get_top_users(users):
 
     users_rating = {k: v for k, v in sorted(users_rating.items(), key=lambda item: item[1], reverse=True)}
 
-    print(users_rating)
     return users_rating
 
 
@@ -538,7 +497,6 @@ def write_top_to_db(users):
         # attr = vars(user)
         print(vars(user[1]))
         # ', '.join("%s: %s" % item for item in attr.items())
-    pass
 
 
 if __name__ == '__main__':
@@ -553,15 +511,12 @@ if __name__ == '__main__':
 
         write_results_to_db(results)
 
-        # Филльтруем пользователей со скрытыми профилями, не заходивших более 30 дней и с незаполненными интересами
+        # Фильтруем пользователей со скрытыми профилями, не заходивших более 30 дней и с незаполненными интересами
         filtered_results = filter_search_results(results)
 
         users_dict = create_users_dict(filtered_results)
 
         vk_ids_for_execute = get_25_vk_ids_for_execute(users_dict)
-
-        if main_user.get_friends_list():
-            get_mutual_friends(main_user, vk_ids_for_execute, users_dict)
 
         if main_user.get_groups_dict():
             get_groups(vk_ids_for_execute, users_dict)
