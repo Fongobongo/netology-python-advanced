@@ -1,9 +1,11 @@
-from parameters.constants import constant, today
+from parameters.constants import constant, today, weights
 from search_engine.search_options import options, my_favorites, minimum_favorites
 from search_engine import search
 from my_exceptions import errors
 from datetime import datetime, timedelta
+from decimal import Decimal
 import requests
+import psycopg2
 import time
 import re
 
@@ -100,8 +102,8 @@ class User:
 
         self.vk_id = vk_id
         self.groups = self.common_groups = None
-        self.common_groups_count = self.common_friends_count = self.rating = 0
-        self.common_favorites = dict()
+        self.common_groups_count = self.rating = 0
+        self.common_interests = dict()
 
         if user_info:
             self.user_info = user_info
@@ -238,27 +240,27 @@ def search_for_couple(user):
     }
 
     response = get_response_without_error(url, params)
-    if response.get('response'):
-        count = response.get('response').get('count')
-        if count > 1000:
-
-            ages_amount = age_delta + 1
-            per_year_amount = count / ages_amount
-
-            print(f"Найдено человек: {count}, количество возрастов: {ages_amount}, человек за год: {per_year_amount}")
-
-            if per_year_amount > 0:
-
-                start_year = today.year - age_to - 1
-                end_year = today.year - age_from
-                month = '%02d' % today.month
-
-                print(f"Ищем по каждому месяцу всех возрастов: c {month}.{start_year} по {month}.{end_year}")
-
-                result = response.get('response').get('items')
-
-        else:
-            result = response.get('response').get('items')
+    # if response.get('response'):
+    #     count = response.get('response').get('count')
+    #     if count > 1000:
+    #
+    #         ages_amount = age_delta + 1
+    #         per_year_amount = count / ages_amount
+    #
+    #         print(f"Найдено человек: {count}, количество возрастов: {ages_amount}, человек за год: {per_year_amount}")
+    #
+    #         if per_year_amount > 0:
+    #
+    #             start_year = today.year - age_to - 1
+    #             end_year = today.year - age_from
+    #             month = '%02d' % today.month
+    #
+    #             print(f"Ищем по каждому месяцу всех возрастов: c {month}.{start_year} по {month}.{end_year}")
+    #
+    #             result = response.get('response').get('items')
+    #
+    #     else:
+    #         result = response.get('response').get('items')
 
     # print(response)
     # repeat = True
@@ -427,12 +429,17 @@ def count_rating(user, users):
     main_user_favorites = my_favorites
 
     for key, value in my_favorites.copy().items():
+
         if user.user_info.get(key):
-            criteria_value = value + ", " + user.user_info.get(key)
-            main_user_favorites.update({key: criteria_value})
+            if value:
+                criteria_value = value + ", " + user.user_info.get(key)
+                main_user_favorites.update({key: criteria_value})
+            else:
+                main_user_favorites.update({key: user.user_info.get(key)})
+
         if main_user_favorites.get(key):
             count += 1
-            filtered_string = re.sub(pattern, '', value).replace(", ", ",")
+            filtered_string = re.sub(pattern, '', main_user_favorites.get(key)).replace(", ", ",")
             criteria_value = set(x.lower().strip() for x in filtered_string.split(","))
             main_user_favorites.update({key: criteria_value})
         else:
@@ -449,12 +456,11 @@ def count_rating(user, users):
                 current_user_favorites[key] = set(x.lower().strip() for x in filtered_string.split(","))
                 common_interest = main_user_favorites.get(key).intersection(current_user_favorites.get(key))
                 if common_interest:
-                    current_user.common_favorites.update({key: common_interest})
-                    current_user.rating += len(common_interest)
+                    current_user.common_interests.update({key: common_interest})
+                    current_user.rating += len(common_interest) * weights.get(key, 1)
 
-        current_user.rating += current_user.user_info.get('common_count', 0) + current_user.common_groups_count
-
-        print(current_user.common_favorites, current_user.rating)
+        current_user.rating += current_user.user_info.get('common_count', 0) * weights.get('friends', 1)
+        current_user.rating += current_user.common_groups_count * weights.get('groups')
 
 
 def get_top_users(users):
@@ -466,15 +472,52 @@ def get_top_users(users):
 
     users_rating = {k: v for k, v in sorted(users_rating.items(), key=lambda item: item[1], reverse=True)}
 
+    print("Рейтинг пользователей: ", users_rating)
+
     return users_rating
 
 
-def write_top_to_db(users):
-    # for user in users.items():
-        # attr = vars(user)
-        # print(vars(user[1]))
-        # ', '.join("%s: %s" % item for item in attr.items())
-    pass
+def write_users_to_db(users):
+    with psycopg2.connect("dbname=vk_users user=test password=1234") as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""create table if not exists users(
+    		id serial primary key not null,
+    		vk_id numeric(10),
+    		rating numeric(10,2),
+    		user_info varchar(65534),  
+    		time timestamp with time zone);
+            """)
+
+    now = datetime.now()
+
+    for user in users.items():
+
+        vk_id = vars(user[1]).get('vk_id')
+        rating = vars(user[1]).get('rating')
+        user_info = str(vars(user[1]))
+
+        with psycopg2.connect("dbname=vk_users user=test password=1234") as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("insert into users (vk_id, rating, user_info, time) values (%s, %s, %s, %s)",
+                (vk_id, rating, user_info, now))
+
+
+def read_from_db():
+
+    users_dict_from_db = {}
+
+    with psycopg2.connect("dbname=vk_users user=test password=1234") as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("select vk_id, user_info from users")
+            response = cursor.fetchone()
+
+            if isinstance(response[0], tuple):
+                for user in response:
+                    users_dict_from_db.update({int(user[0]): User(int(user[0]), user[1])})
+            elif isinstance(response[0], Decimal):
+                users_dict_from_db.update({int(response[0]): User(int(response[0]), response[1])})
+
+    return users_dict_from_db
 
 
 if __name__ == '__main__':
@@ -502,16 +545,14 @@ if __name__ == '__main__':
 
         get_top_users(users_dict)
 
-        write_top_to_db(users_dict)
+        write_users_to_db(users_dict)
+
+        read_from_db()
+
     except errors.ServerErrorException:
         print('Не удалось получить ответ. Сервер недоступен')
     except errors.NotEnoughFavorites as e:
         print(f"Указано мало интересов - {e.count}, требуется указать еще минимум {minimum_favorites-e.count}")
-#     try:
-#         user_id = ask_for_username()
-#         if user_id:
-#             victim = User(user_id)
-#             groups_info = create_groups_dict(victim)
 #     except PrivateUserException:
 #         print('Нет доступа к профилю этого пользователя')
 #     except UserDeletedException:

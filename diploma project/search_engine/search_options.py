@@ -7,11 +7,11 @@ options = {
 }
 
 my_favorites = {
-	'movies': "а зори здесь тихие",
-	'music': "Parov Stellar",
+	'movies': 'Красота по-американски',
+	'music': 'The White Stripes',
 	'games': None,
 	'books': None,
-	'interests': "Культура"
+	'interests': 'живопись'
 }
 
 minimum_favorites = 1

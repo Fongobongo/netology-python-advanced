@@ -1,17 +1,18 @@
 from datetime import date
 
+today = date.today()
+
 constant = {
 	'USERNAME': 'eshmargunov',
-	'TOKEN': '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008',
-	'AGE_WEIGHT': 1,
-	'MOVIES_WEIGHT': 1,
-	'MUSIC_WEIGHT': 1,
-	'GAMES_WEIGHT': 1,
-	'BOOKS_WEIGHT': 1,
-	'COMMON_INTERESTS_WEIGHT': 1,
-	'COMMON_FRIENDS_WEIGHT': 1,
-	'COMMON_CITY_WEIGHT': 1,
-	'COMMON_GROUPS_WEIGHT': 1
+	'TOKEN': '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008'
 }
 
-today = date.today()
+weights = {
+	'movies': 1.1,
+	'music': 1.4,
+	'games': 1.1,
+	'books': 1.4,
+	'interests': 1.1,
+	'friends': 2,
+	'groups': 1
+}
